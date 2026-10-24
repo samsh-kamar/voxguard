@@ -1,0 +1,8 @@
+text,source,location,language,data_type
+"Large pothole near Boring Road causing traffic problems","Sample dataset","Boring Road","English","synthetic"
+"Boring Road par bada gaddha hai, traffic jam ho raha hai","Sample dataset","Boring Road","Hindi/Hinglish","synthetic"
+"Power cut since morning in Gaya town","Sample dataset","Gaya Junction","English","synthetic"
+"Patna me naali overflow aur kachra jama hai","Sample dataset","India Gate","Hindi/Hinglish","synthetic"
+"Please check the broken road near Boring Road","Sample dataset","Boring Road","English","synthetic"
+"Unknown locality, streetlight not working","Sample dataset","Unknown locality","English","synthetic"
+"Someone sent a suspicious payment link, possible cyber fraud","Sample dataset","","English","synthetic"
