@@ -7,15 +7,34 @@ from src.database import init_db, save_report, get_reports, update_status, get_h
 from src.analytics import spike_summary
 from src.location import resolve_location
 
-st.set_page_config(page_title="JAN-SAHAYAK", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="VoxGuard - Jan Sahayak", page_icon="🛡️", layout="wide")
+
+# --- COLOURFUL THEME ---
+st.markdown("""
+<style>
+    .stApp { background: #F8F9FF; }
+    div[data-testid="stMetric"] { 
+        background: white !important; border-radius: 16px; padding: 20px; 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06); border-left: 6px solid #6C5CE7; 
+    }
+    div[data-testid="stMetric"] label, div[data-testid="stMetric"] div { color: #2D3436 !important; }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: #2D3436 !important; font-weight: 800 !important; }
+    .stButton>button { background: linear-gradient(90deg, #6C5CE7 0%, #00CEC9 100%); color: white !important; border: none; border-radius: 12px; padding: 10px 24px; font-weight: 700; }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='background:white; padding:20px 25px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.06); border-left:6px solid #6C5CE7; margin-bottom:20px;'>
+    <h1 style='margin:0; color:#2D3436;'>🛡️ VoxGuard - Jan Sahayak</h1>
+    <p style='margin:5px 0 0 0; color:#636E72;'>nagrik ki awaz se sarkar tak • PS-04 • Bihar Police Cyber Hackathon</p>
+</div>
+""", unsafe_allow_html=True)
+
 init_db()
 
-st.title("🛡️ JAN-SAHAYAK")
-st.caption("AI-assisted public grievance intelligence • PS-04 • Bihar Police Cyber Hackathon 2026")
 st.warning("Prototype notice: use only permitted/public or clearly synthetic data. Predictions and alerts require human review.")
 
 page = st.sidebar.radio("Navigate", ["Overview", "Submit Complaint", "Incident Explorer", "Resolution Tracker", "Evaluation"])
-
 if page == "Overview":
     reports = get_reports()
     df = pd.DataFrame(reports)
