@@ -6,3 +6,9 @@ venv/
 jan_sahayak.db
 .streamlit/secrets.toml
 .DS_Store
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.db
+*.sqlite
