@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import streamlit as st
 from src.classifier import classify_issue, suggest_department
@@ -26,15 +27,17 @@ st.markdown("""
 st.markdown("""
 <div style='background:white; padding:20px 25px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.06); border-left:6px solid #6C5CE7; margin-bottom:20px;'>
     <h1 style='margin:0; color:#2D3436;'>🛡️ VoxGuard - Jan Sahayak</h1>
-    <p style='margin:5px 0 0 0; color:#636E72;'>nagrik ki awaz se sarkar tak • PS-04 • Bihar Police Cyber Hackathon</p>
+    <p style='margin:5px 0 0 0; color:#636E72;'>From Citizen Voice to Government Action • PS-04 • Bihar Police Cyber Hackathon</p>
 </div>
 """, unsafe_allow_html=True)
 
 init_db()
+os.makedirs("uploads", exist_ok=True)
 
 st.warning("Prototype notice: use only permitted/public or clearly synthetic data. Predictions and alerts require human review.")
 
 page = st.sidebar.radio("Navigate", ["Overview", "Submit Complaint", "Incident Explorer", "Resolution Tracker", "Evaluation"])
+
 if page == "Overview":
     reports = get_reports()
     df = pd.DataFrame(reports)
@@ -65,7 +68,10 @@ elif page == "Submit Complaint":
         engagement = st.number_input("Engagement count (optional)", min_value=0, max_value=1000000, value=0)
         severity = st.slider("Initial severity estimate", 1, 5, 3)
         criticality = st.slider("Criticality estimate", 1, 5, 2)
+        # --- NEW IMAGE INPUT ---
+        uploaded_image = st.file_uploader("Upload evidence photo (optional)", type=["jpg","jpeg","png"])
         submitted = st.form_submit_button("Analyze and save")
+        
     if submitted:
         if not text.strip():
             st.error("Please enter complaint text.")
@@ -74,6 +80,13 @@ elif page == "Submit Complaint":
             department = suggest_department(issue_type)
             loc = resolve_location(location_text)
             score, reasons = calculate_priority(severity, engagement, 1, criticality, 3)
+            
+            image_path = None
+            if uploaded_image:
+                image_path = os.path.join("uploads", uploaded_image.name)
+                with open(image_path, "wb") as f:
+                    f.write(uploaded_image.getbuffer())
+            
             row = {
                 "source": source, "text": text.strip(), "language": language,
                 "location_text": location_text.strip(), "district": loc["district"],
@@ -81,10 +94,13 @@ elif page == "Submit Complaint":
                 "location_confidence": loc["confidence"], "issue_type": issue_type,
                 "department": department, "priority_score": score,
                 "priority_reasons": "; ".join(reasons), "status": "New",
-                "data_type": "synthetic/demo unless source is verified"
+                "data_type": "synthetic/demo unless source is verified",
+                "image_path": image_path
             }
             report_id = save_report(row)
             st.success(f"Saved report #{report_id}.")
+            if image_path:
+                st.image(image_path, caption="Uploaded Evidence", width=350)
             st.write({"Issue category": issue_type, "Suggested department": department,
                       "Location status": loc["confidence"], "Priority score": score,
                       "Priority reasons": reasons})
@@ -92,13 +108,11 @@ elif page == "Submit Complaint":
             if candidates:
                 st.subheader("Possible duplicate reports — human review required")
                 st.dataframe(pd.DataFrame(candidates), use_container_width=True)
-            else:
-                st.info("No text-similar report found in the current database.")
 
     st.divider()
     st.subheader("Import reports from CSV")
     st.caption("Expected columns: text, source (optional), location (optional), language (optional).")
-    uploaded = st.file_uploader("Choose CSV", type=["csv"])
+    uploaded = st.file_uploader("Choose CSV", type=["csv"], key="csv_uploader")
     if uploaded is not None and st.button("Import CSV"):
         try:
             incoming = pd.read_csv(uploaded).fillna("")
@@ -122,7 +136,8 @@ elif page == "Submit Complaint":
                         "location_confidence": loc["confidence"], "issue_type": issue,
                         "department": suggest_department(issue), "priority_score": score,
                         "priority_reasons": "; ".join(reasons), "status": "New",
-                        "data_type": str(r.get("data_type", "unverified import"))
+                        "data_type": str(r.get("data_type", "unverified import")),
+                        "image_path": None
                     })
                     count += 1
                 st.success(f"Imported {count} rows.")
@@ -147,18 +162,16 @@ elif page == "Incident Explorer":
         selected_id = st.number_input("Check report ID", min_value=1, step=1, value=int(df.iloc[0]["id"]) if not df.empty else 1)
         chosen = next((r for r in reports if int(r["id"]) == int(selected_id)), None)
         if chosen:
+            # Show image if exists
+            if chosen.get("image_path") and os.path.exists(chosen["image_path"]):
+                st.image(chosen["image_path"], caption=f"Evidence for Report #{selected_id}", width=400)
             candidates = find_duplicate_candidates(chosen["text"], [r for r in reports if int(r["id"]) != int(selected_id)])
             if candidates:
                 st.dataframe(pd.DataFrame(candidates), use_container_width=True)
-            else:
-                st.write("No text-similar candidates found.")
-
         st.subheader("Map (known coordinates only)")
         mapped = df.dropna(subset=["latitude", "longitude"])
         if not mapped.empty:
             st.map(mapped.rename(columns={"latitude":"lat", "longitude":"lon"})[["lat","lon"]])
-        else:
-            st.caption("No reports have verified coordinates yet.")
 
 elif page == "Resolution Tracker":
     reports = get_reports()
@@ -169,9 +182,11 @@ elif page == "Resolution Tracker":
         label = st.selectbox("Choose report", list(options.keys()))
         report_id = options[label]
         current = next(r for r in reports if int(r["id"]) == report_id)
-        st.write({k: current[k] for k in ["id","issue_type","department","location_text","priority_score","status","priority_reasons"]})
+        if current.get("image_path") and os.path.exists(current["image_path"]):
+            st.image(current["image_path"], width=400)
+        st.write({k: current[k] for k in ["id","issue_type","department","location_text","priority_score","status","priority_reasons"] if k in current})
         new_status = st.selectbox("Update status", ["New", "Assigned", "In Progress", "Resolved"], index=["New","Assigned","In Progress","Resolved"].index(current["status"]))
-        assigned_to = st.text_input("Assigned team/department", value=current["department"] or "")
+        assigned_to = st.text_input("Assigned team/department", value=current.get("department") or "")
         note = st.text_input("Update note", placeholder="e.g., forwarded to field team")
         if st.button("Save status update"):
             update_status(report_id, new_status, assigned_to, note)
@@ -190,4 +205,3 @@ elif page == "Evaluation":
     - **Runtime:** record median processing time over a documented test size.
     - Do not claim model accuracy without a labelled test set. Clearly label synthetic records.
     """)
-    st.code("pip install -r requirements.txt\nstreamlit run app.py", language="bash")

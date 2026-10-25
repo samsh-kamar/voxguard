@@ -17,6 +17,7 @@ def init_db():
             district TEXT, latitude REAL, longitude REAL, location_confidence TEXT,
             issue_type TEXT, department TEXT, priority_score INTEGER,
             priority_reasons TEXT, status TEXT DEFAULT 'New', data_type TEXT,
+            image_path TEXT,
             created_at TEXT NOT NULL
         )""")
         con.execute("""CREATE TABLE IF NOT EXISTS status_history (
@@ -24,11 +25,16 @@ def init_db():
             report_id INTEGER NOT NULL, old_status TEXT, new_status TEXT,
             assigned_to TEXT, note TEXT, changed_at TEXT NOT NULL
         )""")
+        # --- MIGRATION: agar purana DB hai to image_path column add kar do ---
+        try:
+            con.execute("ALTER TABLE reports ADD COLUMN image_path TEXT")
+        except Exception:
+            pass  # already exists
 
 def save_report(row):
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
     keys = ["source","text","language","location_text","district","latitude","longitude",
-            "location_confidence","issue_type","department","priority_score","priority_reasons","status","data_type"]
+            "location_confidence","issue_type","department","priority_score","priority_reasons","status","data_type","image_path"]
     values = [row.get(k) for k in keys]
     with connect() as con:
         cur = con.execute(
