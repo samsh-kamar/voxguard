@@ -1,32 +1,38 @@
-# JAN-SAHAYAK — PS-04 | VoxGuard
+# 🛡️ VoxGuard - Jan Sahayak
+### AI-Assisted Public Grievance Intelligence Platform
+**PS-04 | Bihar Police Cyber Hackathon | Team: Civic Lens**
 
-An explainable, local Python/Streamlit prototype for public grievance intake, basic categorization, text-similarity duplicate candidates, priority scoring, curated locality matching, and status tracking.
+> Prototype for Demo — Use only permitted, public, or synthetic data. All predictions require human review.
 
-Built for Bihar Police Hackathon PS-04 — by Team VoxGuard (Leader: Samsh Kamar)
+### 🔴 Problem Statement (PS-04)
+- Citizen complaints are scattered across social media, calls, and written reports.
+- High volume of duplicate complaints, misinformation, and no priority tagging.
+- Lack of real-time spike detection and location-wise insights for Police/Admin.
 
-### Features
-- Grievance intake via manual entry / CSV
-- Keyword-based classification
-- TF-IDF based duplicate detection (candidate identification)
-- Priority scoring (severity + engagement)
-- Location lookup from `data/locations.csv`
-- Streamlit dashboard with analytics and map
+### ✅ Our Solution
+**VoxGuard** is a Streamlit-based MVP that provides:
+1.  **Auto-Classification**: Classifies issues into Pothole, Waterlogging, Garbage, Streetlight, etc.
+2.  **Deduplication**: Groups similar complaints from the same area to avoid repetition.
+3.  **Priority Scoring**: Calculates priority (P0-Critical to P3-Low) based on urgency, location, and keywords.
+4.  **Department Routing**: Auto-suggests responsible department — Municipal, PWD, Electricity, etc.
+5.  **Analytics Dashboard**: Shows daily trends, spike alerts, and status tracking.
 
-### Important Limitations (For Judges)
-- This is a hackathon prototype, not an operational police system
-- Social platform connectors are **not** implemented
-- Classifier uses keyword rules, not IndicBERT
-- Duplicate detection shows candidates, does not prove same incident
-- Location lookup only from `data/locations.csv` — sample coords are illustrative
-- No automatic fake-news determination — human review required
-- Sample data is synthetic
+### ✨ Key Features
+- **Overview**: Total reports, high-priority count, recent spikes — with a clean civic theme
+- **Submit Complaint**: Citizen form and CSV bulk upload
+- **Incident Explorer**: Search, filter, sort, and update status (Pending / In-Progress / Resolved)
+- **Resolution Tracker**: Audit history of actions taken
+- **Evaluation**: Model performance metrics for prototype
 
-### Setup
+### 🛠️ Tech Stack
+- Frontend: Streamlit (Python) with Custom Light Theme
+- Backend: Python modules — `classifier.py`, `deduplication.py`, `priority.py`, `location.py`
+- Database: SQLite (`jan_sahayak.db`)
+- Data: Pandas for analytics
+
+### 🚀 Setup Locally
 ```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-# source .venv/bin/activate
+git clone https://github.com/samsh-kamar/JAN_SAHAYAK_MVP_Starter.git
+cd JAN_SAHAYAK_MVP_Starter
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run app.py --theme.base light
