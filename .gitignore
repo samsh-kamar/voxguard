@@ -2,13 +2,9 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-.jan_sahayak.db
 jan_sahayak.db
-.streamlit/secrets.toml
-.DS_Store
-.venv/
-venv/
-__pycache__/
-*.pyc
 *.db
-*.sqlite
+.streamlit/secrets.toml
+uploads/*
+!uploads/.gitkeep
+.DS_Store

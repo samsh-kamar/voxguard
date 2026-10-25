@@ -1,5 +1,5 @@
-locality,district,latitude,longitude,aliases
-Boring Road,Patna,25.6127,85.1050,"boring road;boring road patna"
-India Gate,Patna,25.6093,85.1235,"gandhi maidan;patna central"
-Gaya Junction,Gaya,24.7969,85.0002,"gaya station;gaya junction"
-Muzaffarpur Town,Muzaffarpur,26.1209,85.3647,"muzaffarpur;muzaffarpur town"
+locality,district,latitude,longitude,aliases,coordinate_status
+Boring Road,Patna,25.6127,85.1050,"boring road;boring road patna",illustrative
+Gandhi Maidan,Patna,25.6093,85.1235,"gandhi maidan;patna central",illustrative
+Gaya Junction,Gaya,24.7969,85.0002,"gaya station;gaya junction",illustrative
+Muzaffarpur Town,Muzaffarpur,26.1209,85.3647,"muzaffarpur;muzaffarpur town",illustrative

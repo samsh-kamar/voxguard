@@ -1,48 +1,44 @@
-import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-def find_duplicate_candidates(new_text, rows, threshold=0.2):
+def find_duplicate_candidates(new_text, rows, threshold=0.35):
     """
-    Find duplicate candidates from list of dicts.
-    rows: list of dicts with 'text' key or list of strings
-    Returns list of matching items with score
+    Return text-similar candidates for human review.
+    This does not prove that reports describe the same event or that evidence is fake.
+    `rows` may contain dicts with a `text` field or plain strings.
     """
-    if not new_text or not rows:
+    query = str(new_text or "").strip()
+    if not query or not rows:
         return []
-    
-    # Extract texts from rows
-    existing_texts = []
-    for r in rows:
-        if isinstance(r, dict):
-            existing_texts.append(r.get('text', ''))
-        else:
-            existing_texts.append(str(r))
-    
-    if not any(existing_texts):
+
+    valid = []
+    texts = []
+    for index, item in enumerate(rows):
+        body = str(item.get("text", "") if isinstance(item, dict) else item or "").strip()
+        if body:
+            valid.append((index, item, body))
+            texts.append(body)
+    if not texts:
         return []
-    
-    all_texts = [new_text] + existing_texts
-    
+
     try:
-        vectorizer = TfidfVectorizer(stop_words='english', min_df=1)
-        tfidf_matrix = vectorizer.fit_transform(all_texts)
-        
-        new_vec = tfidf_matrix[0:1]
-        existing_vecs = tfidf_matrix[1:]
-        
-        scores = cosine_similarity(new_vec, existing_vecs)[0]
-        
-        candidates = []
-        for idx, score in enumerate(scores):
-            if score >= threshold:
-                candidates.append({
-                    "index": idx,
-                    "score": float(score),
-                    "row": rows[idx] if idx < len(rows) else None
-                })
-        
-        return candidates
-    except Exception as e:
-        print(f"Dedup error: {e}")
+        # Do not use English-only stop words: reports may be Hindi/Hinglish or regional.
+        matrix = TfidfVectorizer(ngram_range=(1, 2), min_df=1).fit_transform([query] + texts)
+        scores = cosine_similarity(matrix[0:1], matrix[1:]).ravel()
+    except ValueError:
         return []
+
+    candidates = []
+    for (original_index, item, body), score in zip(valid, scores):
+        if float(score) >= float(threshold):
+            row = item if isinstance(item, dict) else {}
+            candidates.append({
+                "candidate_id": row.get("id", original_index),
+                "similarity": round(float(score), 3),
+                "category": row.get("issue_type", ""),
+                "location": row.get("location_text", ""),
+                "status": row.get("status", ""),
+                "text": body[:240],
+                "review_note": "Text-similarity candidate only; human review required for location, time, and evidence."
+            })
+    return sorted(candidates, key=lambda item: item["similarity"], reverse=True)

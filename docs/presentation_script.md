@@ -1,44 +1,30 @@
-# Presentation and judging script (about 8–9 minutes)
+# Presentation script (about 8–9 minutes)
 
-## Slide 1 — Title and mission (0:00–0:35)
-“JAN-SAHAYAK is our prototype for turning scattered public grievance reports into structured, reviewable incidents. It is designed for PS-04 and prioritizes traceability and human oversight.”
+## 0:00–0:40 — Problem and mission
+“JAN-SAHAYAK is a prototype that organizes scattered public grievance reports into structured, reviewable incident records.”
 
-## Slide 2 — Problem (0:35–1:15)
-“Complaints may be repeated across posts and comments, written in mixed languages, or missing precise locations. A manual operator can struggle to compare reports and see emerging patterns.”
+## 0:40–1:25 — Scope and architecture
+“Data enters through manual entry or CSV. This demo does not claim live social-platform ingestion. The pipeline classifies issues, looks up curated locations, surfaces possible duplicates, estimates priority, and stores status history.”
 
-## Slide 3 — Existing gap and scope (1:15–1:50)
-“Our MVP demonstrates the core workflow with permitted or synthetic sample data. It does not claim to scrape social platforms live; integrations require authorized access.”
+## 1:25–2:30 — Classification and location
+“The current classifier is a transparent keyword baseline, not a trained language model. If a location is not in the curated sample list, the system marks it unverified instead of guessing.”
 
-## Slide 4 — Architecture (1:50–2:35)
-“Inputs enter through a form or CSV. We normalize text, categorize the issue, match only curated locations, generate possible duplicate candidates, calculate an explainable priority, and store everything in SQLite.”
+## 2:30–3:45 — Duplicate candidates
+“TF-IDF similarity surfaces text-similar reports for human review. It does not establish that two reports refer to the same incident or prove fake evidence.”
 
-## Slide 5 — Classification (2:35–3:15)
-“Here is a Hindi/Hinglish example. The current baseline uses transparent keyword rules. This is intentionally modest and testable; a multilingual transformer is a future extension, not a claimed feature.”
+## 3:45–4:45 — Priority score
+“The score combines severity, engagement, cluster growth, and criticality. It is an explainable prototype heuristic, not a validated operational risk model.”
 
-## Slide 6 — Duplicate candidates (3:15–4:00)
-“TF-IDF cosine similarity surfaces reports that may describe the same incident. It does not merge or label them as fake automatically. The operator checks location, time, and evidence.”
+## 4:45–6:00 — Resolution workflow
+“An operator can assign a report, update its status, attach a note, and review the status history. An optional image can be stored with the report, but the application does not verify the image's authenticity.”
 
-## Slide 7 — Priority and location (4:00–4:50)
-“The priority score combines severity, engagement, cluster growth, criticality, and a small trust signal. The interface exposes its components. Unknown locations stay unverified instead of being guessed.”
+## 6:00–7:00 — Evaluation
+“We tested core rules, candidate matching, score validation, location uncertainty, and status persistence. We will show only metrics measured on a labelled dataset.”
 
-## Slide 8 — Lifecycle demo (4:50–6:00)
-“An operator can assign a report and move it from New to Assigned, In Progress, and Resolved. Each change is stored in the history table.”
+## 7:00–8:00 — Privacy and limitations
+“The demo uses synthetic or permitted data, keeps uncertain outputs visible, and leaves important decisions to a human reviewer. Live APIs, advanced vision, speech-to-text, and production access controls remain future work unless implemented separately.”
 
-## Slide 9 — Testing and results (6:00–7:00)
-“We test category rules, score range, duplicate candidate behavior, persistence, and unknown locations. We will report metrics only from a labelled test set and state its size.”
+## 8:00–8:45 — Impact and next steps
+“Our next steps are validated local data, stronger multilingual evaluation, authorized integrations, and a more rigorous duplicate and evidence workflow.”
 
-## Slide 10 — Privacy and limitations (7:00–7:45)
-“We use only permitted or synthetic data in the demo, preserve provenance, avoid exposing unnecessary personal information, and keep consequential decisions under human review.”
-
-## Slide 11 — Impact and next steps (7:45–8:30)
-“The prototype demonstrates a practical foundation. Next steps are authorized connectors, stronger regional-language models, validated ward mapping, and more rigorous evidence similarity checks.”
-
-## Live demo sequence
-1. Import `data/sample_complaints.csv`.
-2. Open Incident Explorer and show predicted categories.
-3. Submit two similar road complaints and show duplicate candidates.
-4. Show priority component reasons and unknown-location behavior.
-5. Assign a report, update its status, and show the history.
-6. Return to Overview and explain the small-data limitation.
-
-Replace this script's descriptions with what actually works in your final build. Never claim a feature or metric that you have not tested.
+Replace any statement that does not match the final tested build. Never claim a feature or metric that has not been verified.
